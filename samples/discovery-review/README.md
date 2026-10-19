@@ -6,18 +6,45 @@
 
 참고: [Building prod with Jev and LangGraph](https://www.langchain.com/blog/building-prod-with-jev-and-langgraph), [원본 예제 gist](https://gist.github.com/sydney-runkle/a632ba4ea0b2b72501dfa4b6ab2a7d8a). 원본의 Jev·SemIf·Claude를 로컬 모델로 바꿨다.
 
+### 페이지 라우팅
+
 ```mermaid
-graph TD;
-	start([start]) -. Send, 페이지마다 .-> classify
-	classify -.-> attorney_review
-	classify -.-> produce
-	classify -.-> withhold
-	classify -.-> redact
-	redact -. 잔여 PII .-> attorney_review
-	redact -. 깨끗함 .-> done([end])
-	attorney_review --> done
-	produce --> done
-	withhold --> done
+flowchart TD
+	B([페이지 묶음]) -- "Send(), 페이지마다 하위 그래프" --> C["classify<br/>d3-flash 1회: responsive(score)<br/>privileged · contains_pii(noul)"]
+	C --> P{"privileged > 0.2?"}
+	P -- 예 --> AR["attorney_review<br/>interrupt()"]
+	P -- 아니오 --> N{"responsive < 0.5?"}
+	N -- 예 --> W[withhold]
+	N -- 아니오 --> M{"responsive < 1.5 또는<br/>confidence < 0.7?"}
+	M -- 예 --> AR
+	M -- 아니오 --> I{"contains_pii > 0.5?"}
+	I -- 아니오 --> PR[produce]
+	I -- 예 --> RD["redact<br/>로컬 LLM이 PII를 [REDACTED]로"]
+	RD --> V{"d3-flash 재검사<br/>잔여 PII > 0.5?"}
+	V -- 예 --> AR
+	V -- 아니오 --> PRR[produce: 레드랙션본]
+	AR -- 변호사 결정 --> D[produce / withhold]
+```
+
+특권 문서를 내보내는 비용이 가장 크므로 특권 판정을 가장 먼저, 낮은 임계값(0.2)으로 본다. 관련성은 점수가 기댓값이라 구간으로 읽고, 애매한 중간 구간은 사람에게 넘긴다.
+
+### 변호사 검토 중단과 재개
+
+```mermaid
+sequenceDiagram
+	participant App as demo.py
+	participant G as LangGraph
+	participant CP as 체크포인터
+	participant H as 변호사
+	App->>G: invoke(pages)
+	G->>G: 페이지별 분류·라우팅 (자동 처리 페이지는 바로 완료)
+	G->>CP: 상태 저장
+	G-->>App: __interrupt__ (doc_id·점수만, 본문 없음)
+	App->>H: 검토 요청
+	H-->>App: produce / withhold
+	App->>G: invoke(Command(resume={interrupt_id: 결정}))
+	G->>CP: 저장된 상태 복원
+	G-->>App: 최종 results
 ```
 
 - `Send()`로 페이지마다 하위 그래프를 하나씩 띄워 동시에 분류한다.

@@ -3,10 +3,12 @@
   "primary": "frontend-design",
   "review": [],
   "tools": [],
-  "host": null,
-  "model": null,
-  "effort": null,
-  "design": null,
-  "tokens": [],
+  "host": "claude-code",
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "design": "web/static/style.css",
+  "tokens": [
+    "web/static/style.css"
+  ],
   "components": []
 }

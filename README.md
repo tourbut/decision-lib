@@ -11,6 +11,14 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [discovery-review](samples/discovery-review/README.md) | LangGraph로 만든 소송 디스커버리 문서 검토 파이프라인. 페이지마다 관련성·특권·개인정보를 판정해 제출·보류·레드랙션·변호사 검토로 보낸다 | [Building prod with Jev and LangGraph](https://www.langchain.com/blog/building-prod-with-jev-and-langgraph) |
 | [rag-passage-filter](samples/rag-passage-filter/README.md) | RAG 검색 문단을 생성 전에 분류한다. 관련성·근거·전제 충돌·프롬프트 인젝션을 판정해 채택 근거·충돌 근거·제외로 나눈다 | [TypeSafe cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), #3 |
 
+## 웹에서 실행
+
+`web/`은 샘플을 브라우저에서 실행하는 화면이다. 판정 확률과 분기 임계값, 처리 흐름 다이어그램을 함께 보여 준다. 자세한 내용은 [web/README.md](web/README.md)에 있다.
+
+```bash
+cd web && uv sync && uv run uvicorn app:app --port 8300   # http://127.0.0.1:8300
+```
+
 ## 모델
 
 | 모델 | 용도 | 위치 |
@@ -44,7 +52,8 @@ LOCAL_LLM_MODEL=<model>
 
 ## 샘플 추가
 
-1. `samples/<이름>/`에 `pyproject.toml`(uv, `package = false`)과 `README.md`를 만든다.
+1. `samples/<이름>/`에 `pyproject.toml`(uv, `package = false`)과 `README.md`를 만든다. README는 처리 흐름을 mermaid 다이어그램으로 설명한다(판정 지점·임계값·분기 결과 포함).
 2. 네트워크 없이 도는 테스트를 두고, 실제 모델 실행은 `demo.py` 같은 별도 스크립트로 분리한다.
 3. 위 샘플 표에 한 줄을 추가한다.
-4. 테스트 명령을 `.fullops-squad/lint/lint.json`의 `commands`에 등록한다.
+4. `web/`에 어댑터와 화면을 추가한다([web/README.md](web/README.md)의 샘플 추가 절).
+5. 테스트 명령을 `.fullops-squad/lint/lint.json`의 `commands`에 등록한다.

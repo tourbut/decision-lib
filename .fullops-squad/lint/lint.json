@@ -24,6 +24,18 @@
         "-q"
       ],
       "cwd": "samples/rag-passage-filter"
+    },
+    {
+      "name": "web-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "web"
     }
   ],
   "timeout_seconds": 600,
