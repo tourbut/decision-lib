@@ -58,7 +58,7 @@ def use(answer_fn) -> None:
 
 def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
-    assert set(samples) == {"discovery-review", "rag-passage-filter"}
+    assert set(samples) == {"discovery-review", "rag-passage-filter", "tool-call-gate"}
     assert all(s["diagrams"] for s in samples.values())
 
 
@@ -110,3 +110,40 @@ def test_unreachable_decision_model_returns_502_with_reason(client) -> None:
     res = client.post("/api/rag-passage-filter/query", json={"query": "토큰"})
     assert res.status_code == 502
     assert "decision 모델" in res.json()["detail"]
+
+
+def gate_answers(request) -> ClassifierResponse:
+    risky = "id_rsa" in request["state"]["args"]
+    probs = {"allow": 0.05, "ask": 0.05, "block": 0.9} if risky else {"allow": 0.9, "ask": 0.05, "block": 0.05}
+    return response({
+        "verdict": {"type": "choice", "choice": max(probs, key=probs.get), "probabilities": probs, "confidence": 0.9},
+        "reads_secrets": {"type": "noul", "noul": 0.9 if risky else 0.0},
+        "sends_outbound": {"type": "noul", "noul": 0.0},
+        "self_advocating": {"type": "noul", "noul": 0.0},
+        "blast_radius": {"type": "score", "score": 0.1, "legend": {0: "r", 1: "e", 2: "h"},
+                         "probabilities": {0: 0.9, 1: 0.1, 2: 0.0}, "confidence": 0.9},
+    })
+
+
+class ToolCallingFake(GenericFakeChatModel):
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+
+def test_tool_gate_check_uses_rules_then_model(client) -> None:
+    use(gate_answers)
+    check = lambda command: client.post("/api/tool-call-gate/check",
+                                        json={"task": "정리", "tool": "bash", "args": {"command": command}}).json()
+    assert check("rm -rf ~")["source"] == "rule"
+    assert check("ls")["action"] == "allow"
+    assert check("cat ~/.ssh/id_rsa")["action"] == "block"
+
+
+def test_tool_gate_agent_reports_each_call(client) -> None:
+    use(gate_answers)
+    calls = [AIMessage(content="", tool_calls=[{"name": "bash", "args": {"command": c}, "id": c}])
+             for c in ("ls", "cat ~/.ssh/id_rsa")]
+    app.dependency_overrides[llm] = lambda: ToolCallingFake(messages=iter([*calls, AIMessage(content="보고")]))
+    data = client.post("/api/tool-call-gate/agent", json={"task": "정리", "approve": False}).json()
+    assert [c["action"] for c in data["calls"]] == ["allow", "block"]
+    assert data["answer"] == "보고"

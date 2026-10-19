@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn>=0.30",
     # Union of the samples' runtime dependencies, since adapters import their code.
     "langchain-typesafe==0.0.1a3",
+    "langchain>=1.0",
     "langgraph>=1.2",
     "langchain-openai>=1.0",
     "python-dotenv>=1.0",

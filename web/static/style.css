@@ -95,7 +95,7 @@ details.flow pre { white-space: pre-wrap; font-size: 12.5px; color: var(--muted)
 
 section.run { display: grid; gap: 14px; margin-bottom: 28px; }
 label.field { display: grid; gap: 6px; font-weight: 600; font-size: 14px; }
-textarea, input[type="text"], input[type="number"] {
+textarea, select, input[type="text"], input[type="number"] {
   font: inherit;
   font-weight: 400;
   color: var(--ink);
@@ -107,6 +107,8 @@ textarea, input[type="text"], input[type="number"] {
 }
 textarea { resize: vertical; min-height: 64px; }
 input.narrow { width: 5em; }
+.row select { width: auto; }
+section.run h3 { margin: 8px 0 0; font-size: 18px; }
 
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .examples button {

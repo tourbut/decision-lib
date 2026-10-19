@@ -20,16 +20,17 @@ from fastapi.staticfiles import StaticFiles
 from langchain_typesafe.client import TypeSafeError
 from openai import APIError as LLMError
 
-from adapters import SAMPLES_DIR, discovery, rag
+from adapters import SAMPLES_DIR, discovery, rag, toolgate
 
 load_dotenv(find_dotenv())  # the repo-root .env
 
 STATIC = Path(__file__).with_name("static")
-ADAPTERS = {"discovery-review": discovery, "rag-passage-filter": rag}
+ADAPTERS = {"discovery-review": discovery, "rag-passage-filter": rag, "tool-call-gate": toolgate}
 
 app = FastAPI(title="decision-lib samples")
 app.include_router(discovery.router, prefix="/api/discovery-review")
 app.include_router(rag.router, prefix="/api/rag-passage-filter")
+app.include_router(toolgate.router, prefix="/api/tool-call-gate")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

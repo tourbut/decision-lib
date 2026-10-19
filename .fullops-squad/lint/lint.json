@@ -26,6 +26,18 @@
       "cwd": "samples/rag-passage-filter"
     },
     {
+      "name": "tool-call-gate-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/tool-call-gate"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
