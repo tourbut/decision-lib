@@ -12,5 +12,11 @@
   "git": {
     "remote": "origin",
     "base": "main"
+  },
+  "review_policy": {
+    "min_code_lines": 1000000,
+    "min_code_files": 100000,
+    "always": [],
+    "auto": false
   }
 }

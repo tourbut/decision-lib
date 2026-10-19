@@ -12,7 +12,8 @@ setup에서 이 레포를 직접 확인하고 채운다. 원본 템플릿의 기
 
 | 항목 | 값 |
 |---|---|
-| 제품 목적 | 미확정 — 레포에 README 제목(`decision-lib`)만 있음. 사용자 확인 필요 |
+| 제품 목적 | decision 모델(로컬 d3-flash)을 쓰는 독립 샘플 모음. 샘플마다 `samples/<이름>/`에 둔다 |
+| 독립 리뷰 | 사용자 결정(2026-10-19)으로 생략한다. `fullops.json`의 `review_policy` 기준을 올려 `review.py need`가 요구하지 않는다 |
 | 기본 브랜치 | `main` (remote `origin`, 역할 브랜치 `fullops/dev`) |
 | 기술 스택·아키텍처 정본 | 미확정 — 소스·설정 파일 없음(초기 레포) |
 | 공통 개발 기준 | [rules/common/README.md](rules/common/README.md) — `fullops-common-0.3.3` |
