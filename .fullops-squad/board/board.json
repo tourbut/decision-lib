@@ -1,0 +1,53 @@
+{
+  "title": "decision-lib",
+  "summary": "초기 레포. FullOps dev 모드 setup 완료, 제품 범위·기술 스택 미확정.",
+  "phases": [
+    {
+      "name": "기획",
+      "status": "todo",
+      "deliverables": [
+        "D01",
+        "D02"
+      ],
+      "note": "제품 목적·범위 확정 전"
+    },
+    {
+      "name": "설계",
+      "status": "todo",
+      "deliverables": [
+        "D03",
+        "D04",
+        "D05",
+        "D06",
+        "D07",
+        "D09",
+        "D10"
+      ],
+      "note": ""
+    },
+    {
+      "name": "구현",
+      "status": "todo",
+      "deliverables": [
+        "D08"
+      ],
+      "note": ""
+    },
+    {
+      "name": "QA",
+      "status": "todo",
+      "deliverables": [],
+      "note": ""
+    },
+    {
+      "name": "이행",
+      "status": "todo",
+      "deliverables": [
+        "D11",
+        "D12",
+        "D13"
+      ],
+      "note": ""
+    }
+  ]
+}
