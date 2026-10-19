@@ -1,3 +1,4 @@
+// rag-passage-filter: run a query and show each retrieved passage with its route and scores.
 import { api, badge, h, meter, runBusy } from "../common.js";
 
 

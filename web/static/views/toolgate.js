@@ -1,3 +1,4 @@
+// tool-call-gate: judge one tool call, run the gated agent, or measure the labelled set.
 import { api, badge, h, meter, runBusy } from "../common.js";
 
 
