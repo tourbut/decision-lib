@@ -34,3 +34,4 @@ setup에서 이 레포를 직접 확인하고 채운다. 원본 템플릿의 기
 - 2026-10-19 setup 시점 레포는 `README.md`만 있다. 언어·패키지 매니저·린터·테스트 러너·CI가 없다.
 - 따라서 lint/test 명령을 연결하지 못했다. `lint/lint.json`의 `commands`는 빈 목록이며 검사 구성은 미완료다.
 - 스택을 정하면 `lint/README.md`의 `레포별 lint 구성` 순서로 린터·타입 검사·테스트를 연결하고 이 절을 갱신한다.
+- 2026-10-19: 샘플은 `samples/<이름>/`에 각자 uv 프로젝트로 둔다. `discovery-review-test`(`uv run --frozen pytest -q`, cwd `samples/discovery-review`)를 `lint.json`에 등록했다. 오프라인 테스트이며 로컬 모델이 필요하지 않다. 린터·타입 검사는 아직 없다.

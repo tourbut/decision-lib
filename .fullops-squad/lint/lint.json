@@ -1,6 +1,19 @@
 {
   "schema_version": 1,
-  "commands": [],
+  "commands": [
+    {
+      "name": "discovery-review-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/discovery-review"
+    }
+  ],
   "timeout_seconds": 600,
   "size": {
     "severity": "WARNING",
