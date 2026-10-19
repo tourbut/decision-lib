@@ -1,0 +1,15 @@
+{
+  "state": "waived",
+  "base": "f65a44eab231c2442124b112a30507692dac22a6",
+  "head": "1213df6eaf031894c82581e409dcbdb8d9e721ae",
+  "reason": "세션 전체 범위(f65a44e..HEAD). 사용자가 DEV-001 샘플 독립 리뷰 면제 결정",
+  "decided_by": "user",
+  "at": "2026-10-19T06:43:49+00:00",
+  "need": {
+    "required": true,
+    "reason": "대규모 코드 변경: 4개 파일 695줄 (기준 15개 또는 400줄)",
+    "code_files": 4,
+    "code_lines": 695,
+    "always": []
+  }
+}
