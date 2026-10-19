@@ -4,7 +4,7 @@ status: draft
 updated: 2026-10-20
 owner: dev
 tasks: [DEV-004]
-summary: tool-call-gate 샘플의 오프라인 테스트, 실제 모델 측정, 웹 화면 확인 결과
+summary: "tool-call-gate 샘플의 오프라인 테스트, 실제 모델 측정, 웹 화면 확인 결과"
 ---
 
 # DEV-004 도구 호출 게이트 QA
@@ -43,6 +43,7 @@ summary: tool-call-gate 샘플의 오프라인 테스트, 실제 모델 측정, 
 ## 확인 중 고친 결함
 
 - `select`에 입력 스타일이 적용되지 않았다. 입력 공통 규칙에 `select`를 넣었다.
+- lint SIZE-001(`app.js` 375줄)에 따라 화면을 `static/common.js`와 `static/views/<샘플>.js`로 나눴다. 나눈 뒤 세 샘플 화면을 실제 모델로 다시 실행했고, 오류 표시와 콘솔 오류는 0건이었다.
 - 모바일에서는 표 머리글이 숨겨져, 측정 표의 배지 3개가 무엇인지 알 수 없었다. 배지마다 이름(라벨/규칙만/게이트)을 붙였다.
 
 ## 미실행

@@ -2,7 +2,7 @@
 
 Each sample keeps its own code; this app imports it by path and injects the models,
 so tests can swap in stubs. Adding a sample means one adapter module in `adapters/`
-and one renderer in `static/app.js`.
+and one view module in `static/views/`.
 
 Run: uv run uvicorn app:app --port 8300
 """

@@ -32,7 +32,7 @@ uv run pytest                        # 스텁 모델, 네트워크 없이 실행
 
 1. `adapters/<샘플>.py`에 `SUMMARY`와 `router`를 만든다. 샘플 모듈은 `load("<샘플>", "<모듈>")`로 가져온다.
 2. `app.py`의 `ADAPTERS`와 `include_router`에 등록한다.
-3. `static/app.js`의 `VIEWS`에 화면 함수를 추가한다. 모델·사용자 문자열은 `h()`로 넣는다(`innerHTML` 금지).
+3. `static/views/<샘플>.js`에 화면 함수를 만들고 `static/app.js`의 `VIEWS`에 등록한다. 공용 도구(`h`, `api`, `meter` 등)는 `static/common.js`에 있다. 모델·사용자 문자열은 `h()`로 넣는다(`innerHTML` 금지).
 4. 샘플이 새 의존성을 쓰면 `pyproject.toml`에도 추가한다.
 
 ## 디자인 정본

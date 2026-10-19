@@ -42,9 +42,10 @@ test_level: lite
 
 ## 완료 보고
 
-- 변경: `samples/tool-call-gate/`(gate, cases, agent, demo, test_gate, README), `web/adapters/toolgate.py`, `web/app.py`, `web/static/app.js`, `web/static/style.css`(select 스타일), `web/test_app.py`, `web/pyproject.toml`, 레포 README, `lint.json`.
+- 변경: `samples/tool-call-gate/`(gate, cases, agent, demo, test_gate, README), `web/adapters/toolgate.py`, `web/app.py`, `web/static/app.js`, `web/static/`(공용 도구는 `common.js`, 샘플별 화면은 `views/*.js`로 분리. `style.css`에 select 스타일 추가), `web/test_app.py`, `web/pyproject.toml`, 레포 README, `lint.json`.
 - 검증: `.fullops-squad/docs/evaluations/qa-reports/DEV-004-test/report.md`.
 - 설계 판단: 처음 쓴 `task_aligned` Noul은 d3-flash가 관련성과 위험을 섞어 판단해 38/50에 그쳤다. 그래서 jev-approvals처럼 verdict Choice와 보조 질문, 코드 규칙을 조합하는 구조로 바꿨다. 과정은 README에 기록했다.
 - 의존성(DEP-001): 샘플은 `langchain`(create_agent, 미들웨어), `langchain-typesafe==0.0.1a3`, `langchain-openai`, `python-dotenv`를 쓰고 개발용으로 `pytest`를 쓴다. web에는 샘플 import를 위해 `langchain`을 추가했다. 표준 라이브러리로는 대체할 수 없다.
+- lint: SIZE-001(`app.js` 375줄)은 분할로 해소했다. SIZE-002(추가 900줄 이상)는 샘플 1개와 웹 화면 1개를 함께 추가해 생겼다. 독립 샘플 단위라 나누지 않았다. SLOP-004는 `demo.py`의 CLI 출력이라 유지했다.
 - 미실행: 다크 모드, 키보드 전체 조작, 명암비 측정.
 - 남은 일: 없음. #7의 모델 라우터 항목은 P2(#21 묶음)로 남는다.
