@@ -12,6 +12,18 @@
         "-q"
       ],
       "cwd": "samples/discovery-review"
+    },
+    {
+      "name": "rag-passage-filter-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/rag-passage-filter"
     }
   ],
   "timeout_seconds": 600,

@@ -9,6 +9,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | 샘플 | 내용 | 참고 |
 |---|---|---|
 | [discovery-review](samples/discovery-review/README.md) | LangGraph로 만든 소송 디스커버리 문서 검토 파이프라인. 페이지마다 관련성·특권·개인정보를 판정해 제출·보류·레드랙션·변호사 검토로 보낸다 | [Building prod with Jev and LangGraph](https://www.langchain.com/blog/building-prod-with-jev-and-langgraph) |
+| [rag-passage-filter](samples/rag-passage-filter/README.md) | RAG 검색 문단을 생성 전에 분류한다. 관련성·근거·전제 충돌·프롬프트 인젝션을 판정해 채택 근거·충돌 근거·제외로 나눈다 | [TypeSafe cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), #3 |
 
 ## 모델
 
