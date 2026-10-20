@@ -62,6 +62,18 @@
       "cwd": "samples/decision-calibration"
     },
     {
+      "name": "effort-router-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/effort-router"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [

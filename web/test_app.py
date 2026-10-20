@@ -59,7 +59,7 @@ def use(answer_fn) -> None:
 def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
-        "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration",
+        "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -200,3 +200,32 @@ def test_calibration_reports_order_bias(client) -> None:
     assert routing["flip_rate"] == 1.0 and routing["position_picks"][0] == 1.0
     sentiment = client.post("/api/decision-calibration/sentiment", json={"limit": 10}).json()
     assert sentiment["n"] == 10 and set(sentiment["methods"]) == {"choice", "choice_reversed", "noul"}
+
+
+def route_answers(request) -> ClassifierResponse:
+    hand = "송금" in request["state"]["message"]
+    probs = {"fast": 0.05, "think": 0.9, "handoff": 0.05} if not hand else {"fast": 0.0, "think": 0.0, "handoff": 1.0}
+    return response({
+        "route": {"type": "choice", "choice": max(probs, key=probs.get), "probabilities": probs, "confidence": 0.8},
+        "needs_access": {"type": "noul", "noul": 0.9 if hand else 0.0},
+        "high_stakes": {"type": "noul", "noul": 0.0},
+    })
+
+
+def test_effort_router_routes_turns_and_compares(client) -> None:
+    from adapters import effort
+
+    use(route_answers)
+    app.dependency_overrides[effort.models] = lambda: {
+        name: GenericFakeChatModel(messages=forever("정답: 3")) for name in ("fast", "think")
+    }
+    rows = client.post("/api/effort-router/route").json()["rows"]
+    assert {r["route"] for r in rows} == {"think", "handoff"}
+
+    data = client.post("/api/effort-router/turn",
+                       json={"text": "strawberry라는 영어 단어에 r이 몇 번 나오나?", "compare": True}).json()
+    assert data["routed"]["tried"] == ["think"] and data["routed"]["correct"] is True
+    assert data["key"] == "3" and set(data["baselines"]) == {"fast", "think"}
+
+    handoff = client.post("/api/effort-router/turn", json={"text": "송금해 줘"}).json()
+    assert handoff["routed"]["tried"] == ["handoff"] and handoff["baselines"] is None

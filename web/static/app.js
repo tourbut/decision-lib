@@ -5,6 +5,7 @@ import { api, h, renderDiagrams, status } from "./common.js";
 import { calibrationView } from "./views/calibration.js";
 import { citationView } from "./views/citation.js";
 import { discoveryView } from "./views/discovery.js";
+import { effortView } from "./views/effort.js";
 import { ragView } from "./views/rag.js";
 import { toolGateView } from "./views/toolgate.js";
 
@@ -18,6 +19,7 @@ const VIEWS = {
   "tool-call-gate": toolGateView,
   "citation-check": citationView,
   "decision-calibration": calibrationView,
+  "effort-router": effortView,
 };
 
 async function show(sample) {
