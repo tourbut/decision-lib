@@ -60,6 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
+        "completion-check",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -229,3 +230,21 @@ def test_effort_router_routes_turns_and_compares(client) -> None:
 
     handoff = client.post("/api/effort-router/turn", json={"text": "송금해 줘"}).json()
     assert handoff["routed"]["tried"] == ["handoff"] and handoff["baselines"] is None
+
+
+def completion_answers(request) -> ClassifierResponse:
+    done = "#52" in request["state"]["final_response"]
+    values = {"claims_done": 0.9, "requirements_met": 0.9 if done else 0.2, "needs_tests": 0.1,
+              "tests_cover": 0.1, "needs_human": 0.0}
+    return response({k: {"type": "noul", "noul": v} for k, v in values.items()})
+
+
+def test_completion_check_and_gated_agent(client) -> None:
+    use(completion_answers)
+    one = client.post("/api/completion-check/check", json={
+        "task": "노트", "response": "#41만", "tests": {"passed": 1, "failed": 1}}).json()
+    assert one["action"] == "steer" and "실패한 테스트 1개" in one["instruction"]
+
+    app.dependency_overrides[llm] = lambda: GenericFakeChatModel(messages=forever("#41, #52 모두"))
+    data = client.post("/api/completion-check/agent", json={"task": "노트를 써라", "lazy": True}).json()
+    assert [a["action"] for a in data["attempts"]] == ["steer", "pass"] and data["final"] == "#41, #52 모두"

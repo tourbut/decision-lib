@@ -14,6 +14,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [citation-check](samples/citation-check/README.md) | LLM 답변의 인용을 출처와 대조한다. 인용문 실재는 문자열로, 주장과 문맥의 관계는 Choice로 판정해 verified·contradicted·unsupported·fabricated로 나누고 확신도 0.8 미만은 사람 검토로 보낸다 | [TypeSafe cookbook: citation check](https://docs.typesafe.ai/cookbooks/citation_check), #4 |
 | [decision-calibration](samples/decision-calibration/README.md) | 판정 확률을 믿어도 되는지 잰다. NSMC 공개 리뷰로 Choice·Noul의 정확도·ECE·Brier·사람 검토 비율을, 문의 라우팅으로 선택지 순서 편향과 L0 보정을 비교한다 | [Raschka](https://magazine.sebastianraschka.com/p/classifier-history-and-jev), [AnyJev](https://github.com/nokia-applied-research/AnyJev), #15 #24 |
 | [effort-router](samples/effort-router/README.md) | 턴마다 추론 끔(fast)·추론 켬(think)·이관(handoff)을 정하는 LangChain 미들웨어. 안전 조건은 이관, 불확실하면 think, 답이 잘리면 한 단계 올린다. 항상 fast·항상 think와 정답·토큰을 비교한다 | [jev-effort-router](https://hermes-agent.nousresearch.com/docs/plugins/jev-effort-router), [effortless-hermes](https://hermes-agent.nousresearch.com/docs/plugins/effortless-hermes), #7 #21 #29 #30 |
+| [completion-check](samples/completion-check/README.md) | 에이전트가 "다 했다"고 할 때 요구사항·테스트·사람 개입 필요를 판정해 pass·steer·halt로 나눈다. 테스트 실패와 시도 상한은 코드가 정하고, LangChain after_model 미들웨어로 덜 된 답을 되돌린다 | [Foreman](https://github.com/thruwire/foreman), Hermes pre_verify, #10 #37 |
 
 ## 웹에서 실행
 

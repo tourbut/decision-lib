@@ -1,0 +1,17 @@
+[project]
+name = "completion-check"
+version = "0.1.0"
+description = "Completion check for coding-agent turns with the local d3-flash decision model"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=1.0",
+    "langchain-typesafe==0.0.1a3",
+    "langchain-openai>=1.0",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false

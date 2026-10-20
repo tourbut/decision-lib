@@ -74,6 +74,18 @@
       "cwd": "samples/effort-router"
     },
     {
+      "name": "completion-check-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/completion-check"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
