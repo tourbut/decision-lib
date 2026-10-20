@@ -9,6 +9,7 @@ import { completionView } from "./views/completion.js";
 import { contextView } from "./views/context.js";
 import { discoveryView } from "./views/discovery.js";
 import { effortView } from "./views/effort.js";
+import { judgmentView } from "./views/judgment.js";
 import { manyView } from "./views/many.js";
 import { ragView } from "./views/rag.js";
 import { rerankView } from "./views/rerank.js";
@@ -32,6 +33,7 @@ const VIEWS = {
   "screenshot-check": screenshotView,
   "many-options": manyView,
   "action-picker": actionView,
+  "judgment-tools": judgmentView,
 };
 
 async function show(sample) {

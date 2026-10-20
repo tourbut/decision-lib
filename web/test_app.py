@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -361,3 +361,41 @@ def test_action_picker_runs_grid_and_reports(client) -> None:
     web = client.post("/api/action-picker/run", json={"env": "web", "index": 7}).json()["runs"][0]
     assert web["impossible"] and web["stopped"] == "DONE" and not web["ok"]  # DONE on a goal the site lacks fails
     assert client.post("/api/action-picker/run", json={"env": "shell"}).status_code == 422
+
+
+def approve_everything(request) -> ClassifierResponse:
+    q = next(iter(request["questions"].values()))
+    labels = list(q.criteria)
+    probs = {k: (0.9 if i == 0 else 0.1 / (len(labels) - 1)) for i, k in enumerate(labels)}
+    return response({name: {"type": "choice", "choice": labels[0], "probabilities": probs, "confidence": 0.9}
+                     for name in request["questions"]})
+
+
+def test_judgment_tools_over_mcp(client) -> None:
+    use(approve_everything)
+    setup = client.get("/api/judgment-tools/setup").json()
+    assert len(setup["tools"]) == 8 and setup["sets"]["approval"] == 10
+    r = client.post("/api/judgment-tools/call", json={"tool": "approval", "arguments": {"command": "ls"}}).json()
+    assert r["decision"] == "APPROVE" and r["execution_authorized"] is False
+    bad = client.post("/api/judgment-tools/call", json={"tool": "approval", "arguments": {"wrong": "x"}})
+    assert bad.status_code == 422
+    rows = client.post("/api/judgment-tools/eval", json={"tool": "approval"}).json()["rows"]
+    assert len(rows) == 10
+
+
+def test_static_modules_parse(tmp_path) -> None:
+    """A syntax error in one view module blanks the whole page; node catches it offline."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node not installed")
+    for js in Path("static").rglob("*.js"):
+        if "vendor" in js.parts:
+            continue
+        copy = tmp_path / (js.stem + ".mjs")  # .mjs: parse as an ES module
+        copy.write_text(js.read_text(encoding="utf-8"), encoding="utf-8")
+        result = subprocess.run([node, "--check", str(copy)], capture_output=True, text=True)
+        assert result.returncode == 0, f"{js}: {result.stderr}"

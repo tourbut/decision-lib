@@ -29,6 +29,7 @@ from adapters import (
     context,
     discovery,
     effort,
+    judgment,
     many,
     rag,
     rerank,
@@ -52,6 +53,7 @@ ADAPTERS = {
     "screenshot-check": screenshot,
     "many-options": many,
     "action-picker": action,
+    "judgment-tools": judgment,
 }
 
 app = FastAPI(title="decision-lib samples")
@@ -67,6 +69,7 @@ app.include_router(context.router, prefix="/api/context-gate")
 app.include_router(screenshot.router, prefix="/api/screenshot-check")
 app.include_router(many.router, prefix="/api/many-options")
 app.include_router(action.router, prefix="/api/action-picker")
+app.include_router(judgment.router, prefix="/api/judgment-tools")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

@@ -20,6 +20,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [screenshot-check](samples/screenshot-check/README.md) | 화면 캡처에서 브랜드 로고와 비밀번호 입력을 판정하고(이미지 입력), 공식 호스트인지는 코드가 URL로 확인해 사칭 로그인을 찾는다. 추출 텍스트만 쓸 때와 비교한다 | [Cloudflare Clef](https://blog.cloudflare.com/clef-decision-models/), [Decision 3.0](https://decision.vllm-sr.ai/docs), #22 #26 |
 | [many-options](samples/many-options/README.md) | 선택지가 많을 때 고르는 법. 스킬 24개 중 최대 1개 추천(전체 순위 → 상위 3개 재검토), 255개를 넘는 시간대 448개는 지역을 먼저 고르는 2단계 Choice | [TypeSafe cookbook: skill suggestion](https://docs.typesafe.ai/cookbooks/skill_suggestion), [tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier), #2 #14 |
 | [action-picker](samples/action-picker/README.md) | 지금 가능한 행동만 후보로 주고 다음 행동 하나(또는 완료·보류)를 고른다. 사내 웹 이동, 설정 앱 조작(dry run), 격자 세계의 플래너 + 컨트롤러(stage guard). 격자는 후보의 크기에 따른 차이를 잰다 | [jev-ultrafast](https://github.com/browser-use/jev-ultrafast), [Agent Desktop](https://github.com/lahfir/agent-desktop), [minecraft-agent](https://github.com/rmalde/minecraft-agent), #1 #19 #18 |
+| [judgment-tools](samples/judgment-tools/README.md) | 판정을 MCP 도구 8개(check, route, score, verify, gate, approval, fastpath, skill_relation)로 노출해 코딩 에이전트가 직접 부르게 한다. 백엔드는 로컬 d3-flash, 결과는 모두 권고다 | [jev-mcp](https://github.com/jkudish/jev-mcp), Hermes jev-typesafe·structured-aux·fastpath·curator, #9 #35 #36 #28 #31 #34 |
 
 ## 웹에서 실행
 

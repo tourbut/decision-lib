@@ -146,6 +146,18 @@
       "cwd": "samples/action-picker"
     },
     {
+      "name": "judgment-tools-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/judgment-tools"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
