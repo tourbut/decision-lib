@@ -22,6 +22,7 @@ from openai import APIError as LLMError
 
 from adapters import (
     SAMPLES_DIR,
+    action,
     calibration,
     citation,
     completion,
@@ -50,6 +51,7 @@ ADAPTERS = {
     "context-gate": context,
     "screenshot-check": screenshot,
     "many-options": many,
+    "action-picker": action,
 }
 
 app = FastAPI(title="decision-lib samples")
@@ -64,6 +66,7 @@ app.include_router(rerank.router, prefix="/api/rerank")
 app.include_router(context.router, prefix="/api/context-gate")
 app.include_router(screenshot.router, prefix="/api/screenshot-check")
 app.include_router(many.router, prefix="/api/many-options")
+app.include_router(action.router, prefix="/api/action-picker")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

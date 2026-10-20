@@ -2,6 +2,7 @@
 // model-produced or user-entered string goes through h() (textContent), never innerHTML.
 
 import { api, h, renderDiagrams, status } from "./common.js";
+import { actionView } from "./views/action.js";
 import { calibrationView } from "./views/calibration.js";
 import { citationView } from "./views/citation.js";
 import { completionView } from "./views/completion.js";
@@ -30,6 +31,7 @@ const VIEWS = {
   "context-gate": contextView,
   "screenshot-check": screenshotView,
   "many-options": manyView,
+  "action-picker": actionView,
 };
 
 async function show(sample) {

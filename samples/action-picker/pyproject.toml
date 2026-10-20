@@ -1,0 +1,15 @@
+[project]
+name = "action-picker"
+version = "0.1.0"
+description = "Next-action picking for browser, desktop, and grid agents with the local d3-flash decision model"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-typesafe==0.0.1a3",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false

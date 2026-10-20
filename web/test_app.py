@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -342,3 +342,22 @@ def test_many_options_skill_and_zone(client) -> None:
     zone = client.post("/api/many-options/zone", json={"text": "카이로"}).json()
     assert zone["groups"] == ["Africa"] and zone["choice"].startswith("Africa/")
     assert len(client.post("/api/many-options/zone/eval").json()["rows"]) == 40
+
+
+def macro_first(request) -> ClassifierResponse:
+    """Walks the grid's macro plan; anything else is done at once."""
+    labels = list(request["questions"]["action"].criteria)
+    order = ["pick_key", "open_door", "goto_K", "goto_D", "goto_E", "DONE"]
+    want = next(a for a in order if a in labels)
+    probs = {k: (0.9 if k == want else 0.1 / (len(labels) - 1)) for k in labels}
+    return response({"action": {"type": "choice", "choice": want, "probabilities": probs, "confidence": 0.9}})
+
+
+def test_action_picker_runs_grid_and_reports(client) -> None:
+    use(macro_first)
+    runs = client.post("/api/action-picker/run", json={"env": "grid:macro"}).json()["runs"]
+    assert [r["ok"] for r in runs] == [True, True, True]
+    assert all(r["moves"] + 2 == r["shortest"] for r in runs)
+    web = client.post("/api/action-picker/run", json={"env": "web", "index": 7}).json()["runs"][0]
+    assert web["impossible"] and web["stopped"] == "DONE" and not web["ok"]  # DONE on a goal the site lacks fails
+    assert client.post("/api/action-picker/run", json={"env": "shell"}).status_code == 422

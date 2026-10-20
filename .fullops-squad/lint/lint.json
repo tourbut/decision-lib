@@ -134,6 +134,18 @@
       "cwd": "samples/many-options"
     },
     {
+      "name": "action-picker-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/action-picker"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
