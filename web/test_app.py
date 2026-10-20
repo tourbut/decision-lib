@@ -58,7 +58,9 @@ def use(answer_fn) -> None:
 
 def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
-    assert set(samples) == {"discovery-review", "rag-passage-filter", "tool-call-gate"}
+    assert set(samples) == {
+        "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration",
+    }
     assert all(s["diagrams"] for s in samples.values())
 
 
@@ -147,3 +149,54 @@ def test_tool_gate_agent_reports_each_call(client) -> None:
     data = client.post("/api/tool-call-gate/agent", json={"task": "정리", "approve": False}).json()
     assert [c["action"] for c in data["calls"]] == ["allow", "block"]
     assert data["answer"] == "보고"
+
+
+def relation_answers(request) -> ClassifierResponse:
+    probs = {"supports": 0.05, "contradicts": 0.9, "says_nothing": 0.05}
+    return response({"relation": {"type": "choice", "choice": "contradicts", "probabilities": probs, "confidence": 0.7}})
+
+
+def test_citation_check_matches_strings_before_the_model(client) -> None:
+    use(relation_answers)
+    citations = [
+        {"id": "a", "claim": "c", "quote": "종이 문서는 분쇄한다.", "section": "1"},
+        {"id": "b", "claim": "c", "quote": "없는 문장", "section": "1"},
+        {"id": "c", "claim": "c", "quote": "", "section": "6"},
+    ]
+    results = client.post("/api/citation-check/check", json={"citations": citations}).json()["results"]
+    assert [(r["verdict"], r["section"], r["needs_review"]) for r in results] == [
+        ("contradicted", "5.2", True), ("fabricated", None, False), ("contradicted", "6", True),
+    ]
+
+
+def test_citation_ask_checks_llm_citations(client) -> None:
+    from langchain_core.runnables import RunnableLambda as Lambda
+
+    class StructuredFake:
+        def with_structured_output(self, schema):
+            return Lambda(lambda _prompt: schema(claims=[{"claim": "c", "quote": "없는 문장", "section": "6"}]))
+
+    use(relation_answers)
+    app.dependency_overrides[llm] = StructuredFake
+    data = client.post("/api/citation-check/ask", json={"question": "유출 시 할 일은?"}).json()
+    assert data["citations"][0]["id"] == "c1" and data["results"][0]["verdict"] == "fabricated"
+
+
+def first_option(request) -> ClassifierResponse:
+    question = request["questions"]["q"]
+    if question.type == "noul":
+        return response({"q": {"type": "noul", "noul": 0.6}})
+    labels = list(question.criteria)
+    probs = {k: 0.7 if i == 0 else 0.1 for i, k in enumerate(labels)}
+    return response({"q": {"type": "choice", "choice": labels[0], "probabilities": probs, "confidence": 0.5}})
+
+
+def test_calibration_reports_order_bias(client) -> None:
+    use(first_option)
+    one = client.post("/api/decision-calibration/one", json={"text": "환불해 주세요"}).json()
+    assert [max(p, key=p.get) for p in one["probabilities"]] == [o[0] for o in one["orders"]]
+
+    routing = client.post("/api/decision-calibration/routing").json()
+    assert routing["flip_rate"] == 1.0 and routing["position_picks"][0] == 1.0
+    sentiment = client.post("/api/decision-calibration/sentiment", json={"limit": 10}).json()
+    assert sentiment["n"] == 10 and set(sentiment["methods"]) == {"choice", "choice_reversed", "noul"}

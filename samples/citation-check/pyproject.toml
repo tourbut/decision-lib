@@ -1,0 +1,16 @@
+[project]
+name = "citation-check"
+version = "0.1.0"
+description = "Citation check: string match plus a d3-flash Choice on the quoted section"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-typesafe==0.0.1a3",
+    "langchain-openai>=1.0",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false

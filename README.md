@@ -11,6 +11,8 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [discovery-review](samples/discovery-review/README.md) | LangGraph로 만든 소송 디스커버리 문서 검토 파이프라인. 페이지마다 관련성·특권·개인정보를 판정해 제출·보류·레드랙션·변호사 검토로 보낸다 | [Building prod with Jev and LangGraph](https://www.langchain.com/blog/building-prod-with-jev-and-langgraph) |
 | [rag-passage-filter](samples/rag-passage-filter/README.md) | RAG 검색 문단을 생성 전에 분류한다. 관련성·근거·전제 충돌·프롬프트 인젝션을 판정해 채택 근거·충돌 근거·제외로 나눈다 | [TypeSafe cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), #3 |
 | [tool-call-gate](samples/tool-call-gate/README.md) | 에이전트가 도구를 실행하기 직전에 차단 규칙과 판정으로 실행·사람 확인·차단을 정한다. LangChain 미들웨어로 로컬 LLM 에이전트에 붙이고, 라벨 50건으로 규칙만 쓸 때와 비교한다 | [Building a harness with Jev](https://www.langchain.com/blog/building-a-harness-with-jev), #7 #6 #27 #38 |
+| [citation-check](samples/citation-check/README.md) | LLM 답변의 인용을 출처와 대조한다. 인용문 실재는 문자열로, 주장과 문맥의 관계는 Choice로 판정해 verified·contradicted·unsupported·fabricated로 나누고 확신도 0.8 미만은 사람 검토로 보낸다 | [TypeSafe cookbook: citation check](https://docs.typesafe.ai/cookbooks/citation_check), #4 |
+| [decision-calibration](samples/decision-calibration/README.md) | 판정 확률을 믿어도 되는지 잰다. NSMC 공개 리뷰로 Choice·Noul의 정확도·ECE·Brier·사람 검토 비율을, 문의 라우팅으로 선택지 순서 편향과 L0 보정을 비교한다 | [Raschka](https://magazine.sebastianraschka.com/p/classifier-history-and-jev), [AnyJev](https://github.com/nokia-applied-research/AnyJev), #15 #24 |
 
 ## 웹에서 실행
 

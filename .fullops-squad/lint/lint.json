@@ -38,6 +38,30 @@
       "cwd": "samples/tool-call-gate"
     },
     {
+      "name": "citation-check-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/citation-check"
+    },
+    {
+      "name": "decision-calibration-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/decision-calibration"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [

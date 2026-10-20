@@ -2,6 +2,8 @@
 // model-produced or user-entered string goes through h() (textContent), never innerHTML.
 
 import { api, h, renderDiagrams, status } from "./common.js";
+import { calibrationView } from "./views/calibration.js";
+import { citationView } from "./views/citation.js";
 import { discoveryView } from "./views/discovery.js";
 import { ragView } from "./views/rag.js";
 import { toolGateView } from "./views/toolgate.js";
@@ -10,7 +12,13 @@ const $ = (sel) => document.querySelector(sel);
 
 // --- Shell ---------------------------------------------------------------------------
 
-const VIEWS = { "discovery-review": discoveryView, "rag-passage-filter": ragView, "tool-call-gate": toolGateView };
+const VIEWS = {
+  "discovery-review": discoveryView,
+  "rag-passage-filter": ragView,
+  "tool-call-gate": toolGateView,
+  "citation-check": citationView,
+  "decision-calibration": calibrationView,
+};
 
 async function show(sample) {
   const main = $("#main");
