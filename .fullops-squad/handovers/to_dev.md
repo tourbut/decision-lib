@@ -15,7 +15,7 @@ test_level: lite
 
 - 작성일: 2026-10-20
 - From / To: 사용자 → dev(현재 세션)
-- 상태: running
+- 상태: done
 - 테스트 레벨 / 하위 에이전트 레벨: lite / lite
 - 승인된 범위 / 추가 승인이 필요한 행위: 샘플 2개와 web 어댑터·화면 추가, fullops/dev·main push, 이슈 #4·#15·#24 댓글·종료. 독립 리뷰는 사용자가 이 레포 전체에 면제했다.
 - 담당 repo id / 워크트리 절대경로 / 브랜치: decision-lib / /home/shin/workspace/decision-lib-dev / fullops/dev
@@ -34,10 +34,10 @@ test_level: lite
 
 ## 해야 할 일과 파일 소유권
 
-- [ ] `samples/citation-check/`: 출처 문서, 라벨 인용 12건, 문자열 검사 → Choice → 4상태, 사람 검토 큐, 로컬 LLM 답변 인용 검사, 테스트, README 다이어그램
-- [ ] `samples/decision-calibration/`: NSMC 200건 Choice(두 순서)·Noul 정확도·ECE·Brier·검토 비율, 문의 라우팅 40건 순환 치환 변경률과 L0 보정, 테스트, README 다이어그램
-- [ ] `web/adapters/`, `web/static/views/`, `web/app.py`, `web/test_app.py`
-- [ ] 레포 README 표, `.fullops-squad/lint/lint.json` 테스트 등록, QA 보고
+- [x] `samples/citation-check/`: 출처 문서, 라벨 인용 12건, 문자열 검사 → Choice → 4상태, 사람 검토 큐, 로컬 LLM 답변 인용 검사, 테스트, README 다이어그램
+- [x] `samples/decision-calibration/`: NSMC 200건 Choice(두 순서)·Noul 정확도·ECE·Brier·검토 비율, 문의 라우팅 40건 순환 치환 변경률과 L0 보정, 테스트, README 다이어그램
+- [x] `web/adapters/`, `web/static/views/`, `web/app.py`, `web/test_app.py`
+- [x] 레포 README 표, `.fullops-squad/lint/lint.json` 테스트 등록, QA 보고
 
 ## 완료 기준과 검증
 
@@ -66,4 +66,11 @@ test_level: lite
 
 ## 완료 보고
 
-(작성 예정)
+- 브랜치 / SHA: fullops/dev / b109f72 (feat: 인용 검증·판정 보정 샘플 추가)
+- 변경 이유: 사용자 요청 "다음 예제들 구현해"에 따라 P1-2(#4)와 P1-3(#15 #24) 샘플을 추가했다.
+- 검증한 것: 샘플 pytest 6+6, web 10 통과. 실제 d3-flash로 citation-check 15/15, NSMC 200건과 문의 40건 측정. 브라우저 1440px·390px에서 두 화면을 실제 모델로 실행, 콘솔 오류 0. 근거는 `docs/evaluations/qa-reports/DEV-005-test/report.md`.
+- 못 한 것: 다크 모드, 키보드 전체 조작, 명암비 측정. 화면에서 NSMC 200건 전체 실행(40건만 확인). IMDb 25,000건 재현은 범위 밖.
+- lint: 오류 0. SLOP-004는 demo.py의 CLI 출력이다. LINT-001은 새 샘플 테스트 2개 등록이다.
+- DEP-001: 새 샘플 pyproject 2개. citation-check는 기존 샘플과 같은 langchain-typesafe, langchain-openai(LLM 답변 생성), python-dotenv. decision-calibration은 langchain-typesafe, python-dotenv만 쓴다. 지표 계산은 표준 라이브러리로 했다. web 의존성 변경 없음.
+- SIZE-002: 샘플 2개를 코드·데이터(NSMC 200줄 포함)·README·웹 화면과 함께 한 번에 추가했다. 샘플마다 독립 폴더라 나눠도 리뷰 단위가 바뀌지 않는다.
+- 남은 일: 주소창 해시만 바꾸면 화면이 바뀌지 않는 기존 동작(범위 밖). L0 효과는 40건에서 1건 차이라 일반화하지 않는다.
