@@ -24,6 +24,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [code-judge](samples/code-judge/README.md) | 한국어 질문으로 이 레포 샘플 코드를 동작 기준으로 찾고(폴더 → 선언 2단계, 키워드 검색과 비교), diff는 체크리스트 5개(주입·비밀·오류 삼킴·자원 누수·민감 로그)로 판정한다 | [jevgrep](https://github.com/dzhng/jevgrep), [jev-review](https://github.com/devagrawal09/jev-review), #12 #13 |
 | [news-match](samples/news-match/README.md) | 헤드라인마다 관심 주제별 Score(0–3)를 매겨 주제별 읽을 목록을 만든다. 낱말만 겹친 기사는 거르고, 기준값별 정밀도·재현율을 비교한다 | [newsjack](https://newsjack.sh), #16 |
 | [order-sim](samples/order-sim/README.md) | 합성 주문장에서 블록마다 매수·매도·보류를 고르는 dry run(실주문 없음). 늦은 결정·포지션 한도·손실 한도는 코드가 막고, 동전 던지기·불균형 규칙과 비교한다 | [jev-trader](https://github.com/jarrodwatts/jev-trader), #20 |
+| [local-judges](samples/local-judges/README.md) | 같은 판정(팀·긴급·불만도)을 d3-flash(질문 3개 한 요청), 로컬 LLM 확률 직접 읽기(logprob), LLM JSON 생성, 소량 라벨 분류기로 내고 정확도·AUC·시간을 비교한다 | [Kev](https://github.com/jaredpalmer/kev), [SemIf](https://github.com/TheoLeeCJ/SemIf), #23 #25 |
 
 ## 웹에서 실행
 

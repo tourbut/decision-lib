@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge", "news-match", "order-sim",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge", "news-match", "order-sim", "local-judges",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -450,3 +450,33 @@ def test_order_sim_dry_run(client) -> None:
     data = client.post("/api/order-sim/run", json={"blocks": 50, "seed": 3}).json()
     assert set(data["results"]) == {"always hold", "coin flip", "imbalance rule", "d3-flash"}
     assert data["results"]["always hold"]["pnl"] == 0 and data["results"]["d3-flash"]["trades"] > 0
+
+
+def ticket_answers(request) -> ClassifierResponse:
+    depts = list(request["questions"]["dept"].criteria)
+    probs = {k: (0.9 if k == "billing" else 0.1 / (len(depts) - 1)) for k in depts}
+    return response({
+        "dept": {"type": "choice", "choice": "billing", "probabilities": probs, "confidence": 0.9},
+        "urgent": {"type": "noul", "noul": 0.2},
+        "frustration": {"type": "score", "score": 1.0, "legend": {"0": "a", "1": "b", "2": "c"},
+                        "probabilities": {"0": 0.1, "1": 0.8, "2": 0.1}, "confidence": 0.7}})
+
+
+def test_local_judges_one_ticket(client) -> None:
+    import math
+    from types import SimpleNamespace as NS
+
+    from adapters import judges
+
+    def create(**kwargs):
+        if kwargs.get("logprobs"):
+            tops = [NS(token="A", logprob=math.log(0.8)), NS(token="B", logprob=math.log(0.2))]
+            return NS(choices=[NS(message=NS(content="A"), logprobs=NS(content=[NS(token="A", top_logprobs=tops)]))])
+        return NS(choices=[NS(message=NS(content='{"dept": "billing", "urgent": false, "frustration": 1}'))])
+
+    use(ticket_answers)
+    app.dependency_overrides[judges.chat_client] = lambda: (NS(chat=NS(completions=NS(create=create))), "m")
+    data = client.post("/api/local-judges/one", json={"text": judges.TICKETS[0]["text"]}).json()
+    assert set(data["methods"]) == {"d3-flash", "LLM 확률 읽기", "LLM JSON", "소량 라벨 NB"}
+    assert data["methods"]["d3-flash"]["answers"]["dept"] == "billing" and data["label"]["dept"] == "billing"
+    assert data["methods"]["LLM JSON"]["answers"] == {"dept": "billing", "urgent": False, "frustration": 1}

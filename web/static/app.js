@@ -10,6 +10,7 @@ import { completionView } from "./views/completion.js";
 import { contextView } from "./views/context.js";
 import { discoveryView } from "./views/discovery.js";
 import { effortView } from "./views/effort.js";
+import { judgesView } from "./views/judges.js";
 import { judgmentView } from "./views/judgment.js";
 import { manyView } from "./views/many.js";
 import { newsView } from "./views/news.js";
@@ -40,6 +41,7 @@ const VIEWS = {
   "code-judge": codeJudgeView,
   "news-match": newsView,
   "order-sim": orderView,
+  "local-judges": judgesView,
 };
 
 async function show(sample) {
