@@ -23,6 +23,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [judgment-tools](samples/judgment-tools/README.md) | 판정을 MCP 도구 8개(check, route, score, verify, gate, approval, fastpath, skill_relation)로 노출해 코딩 에이전트가 직접 부르게 한다. 백엔드는 로컬 d3-flash, 결과는 모두 권고다 | [jev-mcp](https://github.com/jkudish/jev-mcp), Hermes jev-typesafe·structured-aux·fastpath·curator, #9 #35 #36 #28 #31 #34 |
 | [code-judge](samples/code-judge/README.md) | 한국어 질문으로 이 레포 샘플 코드를 동작 기준으로 찾고(폴더 → 선언 2단계, 키워드 검색과 비교), diff는 체크리스트 5개(주입·비밀·오류 삼킴·자원 누수·민감 로그)로 판정한다 | [jevgrep](https://github.com/dzhng/jevgrep), [jev-review](https://github.com/devagrawal09/jev-review), #12 #13 |
 | [news-match](samples/news-match/README.md) | 헤드라인마다 관심 주제별 Score(0–3)를 매겨 주제별 읽을 목록을 만든다. 낱말만 겹친 기사는 거르고, 기준값별 정밀도·재현율을 비교한다 | [newsjack](https://newsjack.sh), #16 |
+| [order-sim](samples/order-sim/README.md) | 합성 주문장에서 블록마다 매수·매도·보류를 고르는 dry run(실주문 없음). 늦은 결정·포지션 한도·손실 한도는 코드가 막고, 동전 던지기·불균형 규칙과 비교한다 | [jev-trader](https://github.com/jarrodwatts/jev-trader), #20 |
 
 ## 웹에서 실행
 

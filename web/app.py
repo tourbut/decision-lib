@@ -33,6 +33,7 @@ from adapters import (
     judgment,
     many,
     news,
+    order,
     rag,
     rerank,
     screenshot,
@@ -58,6 +59,7 @@ ADAPTERS = {
     "judgment-tools": judgment,
     "code-judge": codejudge,
     "news-match": news,
+    "order-sim": order,
 }
 
 app = FastAPI(title="decision-lib samples")
@@ -76,6 +78,7 @@ app.include_router(action.router, prefix="/api/action-picker")
 app.include_router(judgment.router, prefix="/api/judgment-tools")
 app.include_router(codejudge.router, prefix="/api/code-judge")
 app.include_router(news.router, prefix="/api/news-match")
+app.include_router(order.router, prefix="/api/order-sim")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

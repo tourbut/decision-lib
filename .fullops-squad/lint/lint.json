@@ -182,6 +182,18 @@
       "cwd": "samples/news-match"
     },
     {
+      "name": "order-sim-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/order-sim"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [

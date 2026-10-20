@@ -13,6 +13,7 @@ import { effortView } from "./views/effort.js";
 import { judgmentView } from "./views/judgment.js";
 import { manyView } from "./views/many.js";
 import { newsView } from "./views/news.js";
+import { orderView } from "./views/order.js";
 import { ragView } from "./views/rag.js";
 import { rerankView } from "./views/rerank.js";
 import { screenshotView } from "./views/screenshot.js";
@@ -38,6 +39,7 @@ const VIEWS = {
   "judgment-tools": judgmentView,
   "code-judge": codeJudgeView,
   "news-match": newsView,
+  "order-sim": orderView,
 };
 
 async function show(sample) {

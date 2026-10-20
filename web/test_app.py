@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge", "news-match",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge", "news-match", "order-sim",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -437,3 +437,16 @@ def test_news_match_sample_feed_and_pasted(client) -> None:
     assert len(data["headlines"]) == 40 and data["labels"] is not None
     pasted = client.post("/api/news-match/match", json={"headlines": ["HBM 증산", "야구"]}).json()
     assert pasted["labels"] is None and pasted["scores"][0]["chips"] == 3.0
+
+
+def follow_imbalance(request) -> ClassifierResponse:
+    side = "buy" if request["state"]["imbalance"] > 0 else "sell"
+    probs = {"buy": 0.0, "sell": 0.0, "hold": 0.1} | {side: 0.9}
+    return response({"side": {"type": "choice", "choice": side, "probabilities": probs, "confidence": 0.9}})
+
+
+def test_order_sim_dry_run(client) -> None:
+    use(follow_imbalance)
+    data = client.post("/api/order-sim/run", json={"blocks": 50, "seed": 3}).json()
+    assert set(data["results"]) == {"always hold", "coin flip", "imbalance rule", "d3-flash"}
+    assert data["results"]["always hold"]["pnl"] == 0 and data["results"]["d3-flash"]["trades"] > 0
