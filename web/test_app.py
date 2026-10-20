@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -398,3 +398,22 @@ def test_static_modules_parse(tmp_path) -> None:
         copy.write_text(js.read_text(encoding="utf-8"), encoding="utf-8")
         result = subprocess.run([node, "--check", str(copy)], capture_output=True, text=True)
         assert result.returncode == 0, f"{js}: {result.stderr}"
+
+
+def code_answers(request) -> ClassifierResponse:
+    questions = request["questions"]
+    if "q" in questions:  # search: always the first option
+        labels = list(questions["q"].criteria)
+        probs = {k: (0.9 if i == 0 else 0.1 / (len(labels) - 1)) for i, k in enumerate(labels)}
+        return response({"q": {"type": "choice", "choice": labels[0], "probabilities": probs, "confidence": 0.9}})
+    secret = "sk_live" in request["state"]["diff"]
+    return response({k: {"type": "noul", "noul": 0.9 if (k == "secret" and secret) else 0.05} for k in questions})
+
+
+def test_code_judge_search_and_review(client) -> None:
+    use(code_answers)
+    found = client.post("/api/code-judge/search", json={"question": "순위 합치기"}).json()
+    assert len(found["results"]) == 3 and found["results"][0]["path"].startswith("samples/")
+    flagged = client.post("/api/code-judge/review", json={"diff": 'API = "sk_live_x"'}).json()
+    assert flagged["flags"] == ["secret"]
+    assert len(client.post("/api/code-judge/review/eval").json()["rows"]) == 12

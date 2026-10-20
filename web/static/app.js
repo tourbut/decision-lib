@@ -5,6 +5,7 @@ import { api, h, renderDiagrams, status } from "./common.js";
 import { actionView } from "./views/action.js";
 import { calibrationView } from "./views/calibration.js";
 import { citationView } from "./views/citation.js";
+import { codeJudgeView } from "./views/codejudge.js";
 import { completionView } from "./views/completion.js";
 import { contextView } from "./views/context.js";
 import { discoveryView } from "./views/discovery.js";
@@ -34,6 +35,7 @@ const VIEWS = {
   "many-options": manyView,
   "action-picker": actionView,
   "judgment-tools": judgmentView,
+  "code-judge": codeJudgeView,
 };
 
 async function show(sample) {

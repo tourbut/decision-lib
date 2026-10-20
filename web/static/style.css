@@ -112,6 +112,7 @@ section.run h3 { margin: 8px 0 0; font-size: 18px; }
 img.shot { max-width: 100%; width: 360px; border: 1px solid var(--line); border-radius: var(--radius); }
 pre.map { font-size: 14px; line-height: 1.2; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; width: fit-content; }
 .run-block { display: grid; gap: 8px; margin-top: 12px; }
+textarea.code, pre.answer { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 13px; overflow-x: auto; }
 
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .examples button {

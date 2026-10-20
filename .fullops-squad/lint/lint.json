@@ -158,6 +158,18 @@
       "cwd": "samples/judgment-tools"
     },
     {
+      "name": "code-judge-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/code-judge"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
