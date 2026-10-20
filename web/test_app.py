@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check",
+        "completion-check", "rerank",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -248,3 +248,23 @@ def test_completion_check_and_gated_agent(client) -> None:
     app.dependency_overrides[llm] = lambda: GenericFakeChatModel(messages=forever("#41, #52 모두"))
     data = client.post("/api/completion-check/agent", json={"task": "노트를 써라", "lazy": True}).json()
     assert [a["action"] for a in data["attempts"]] == ["steer", "pass"] and data["final"] == "#41, #52 모두"
+
+
+def rerank_answers(request) -> ClassifierResponse:
+    level = 9.0 if request["state"]["document"].startswith("Relevant") else 1.0
+    def answer(n: int, value: float) -> dict:
+        return {"type": "score", "score": min(value, n - 1), "legend": {str(i): str(i) for i in range(n)},
+                "probabilities": {str(i): 1.0 / n for i in range(n)}, "confidence": 0.5}
+    return response({"relevance": answer(10, level), "evidence": answer(3, level)})
+
+
+def test_rerank_query_and_typed_claim(client) -> None:
+    from adapters import rerank
+
+    use(rerank_answers)
+    q = rerank.QUERIES[0]
+    data = client.post("/api/rerank/query", json={"query_id": q["id"], "depth": 5}).json()
+    assert data["rankings"]["bm25"] == q["bm25"][:5] and set(data["metrics"]) >= {"bm25", "relevance"}
+    typed = client.post("/api/rerank/query", json={"text": "vitamin D reduces fracture risk", "depth": 5}).json()
+    assert typed["metrics"] is None and len(typed["rows"]) <= 5
+    assert client.post("/api/rerank/query", json={"query_id": "nope"}).status_code == 404

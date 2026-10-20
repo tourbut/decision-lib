@@ -1,0 +1,15 @@
+[project]
+name = "rerank"
+version = "0.1.0"
+description = "BM25 candidates reranked with d3-flash Score rubrics, measured on SciFact"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-typesafe==0.0.1a3",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false

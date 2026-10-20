@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from langchain_typesafe.client import TypeSafeError
 from openai import APIError as LLMError
 
-from adapters import SAMPLES_DIR, calibration, citation, completion, discovery, effort, rag, toolgate
+from adapters import SAMPLES_DIR, calibration, citation, completion, discovery, effort, rag, rerank, toolgate
 
 load_dotenv(find_dotenv())  # the repo-root .env
 
@@ -33,6 +33,7 @@ ADAPTERS = {
     "decision-calibration": calibration,
     "effort-router": effort,
     "completion-check": completion,
+    "rerank": rerank,
 }
 
 app = FastAPI(title="decision-lib samples")
@@ -43,6 +44,7 @@ app.include_router(citation.router, prefix="/api/citation-check")
 app.include_router(calibration.router, prefix="/api/decision-calibration")
 app.include_router(effort.router, prefix="/api/effort-router")
 app.include_router(completion.router, prefix="/api/completion-check")
+app.include_router(rerank.router, prefix="/api/rerank")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

@@ -8,6 +8,7 @@ import { completionView } from "./views/completion.js";
 import { discoveryView } from "./views/discovery.js";
 import { effortView } from "./views/effort.js";
 import { ragView } from "./views/rag.js";
+import { rerankView } from "./views/rerank.js";
 import { toolGateView } from "./views/toolgate.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -22,6 +23,7 @@ const VIEWS = {
   "decision-calibration": calibrationView,
   "effort-router": effortView,
   "completion-check": completionView,
+  "rerank": rerankView,
 };
 
 async function show(sample) {
