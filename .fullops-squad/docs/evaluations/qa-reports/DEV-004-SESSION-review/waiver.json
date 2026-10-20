@@ -1,0 +1,15 @@
+{
+  "state": "waived",
+  "base": "f65a44eab231c2442124b112a30507692dac22a6",
+  "head": "c959011fe05119b7728ac590877b5f4c372f1264",
+  "reason": "세션 시작 기준의 이전 review_policy. 사용자가 이 레포 독립 리뷰 전면 면제",
+  "decided_by": "user",
+  "at": "2026-10-19T23:40:27+00:00",
+  "need": {
+    "required": true,
+    "reason": "대규모 코드 변경: 25개 파일 2761줄 (기준 15개 또는 400줄)",
+    "code_files": 25,
+    "code_lines": 2761,
+    "always": []
+  }
+}
