@@ -1,38 +1,45 @@
 """Route the 32 labelled turns, then compare answers: always fast, always think, routed.
 
-Usage: python demo.py [--route-only] ["메시지"]   # a message runs just that turn
+Usage: python demo.py [--route-only | --shadow] ["메시지"]   # a message runs just that turn
+       --shadow serves every turn from think and logs what the router would have done
 """
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
+from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langchain_typesafe import TypeSafeClassifier
 
-from router import SYSTEM, build_agent, correct, route_turn, run_turn
+from router import SYSTEM, build_agent, correct, route_turn, run_turn, shadow_report
 from turns import TURNS
 
 load_dotenv(find_dotenv())  # the repo-root .env
 
 
+TIERS = json.loads(Path(__file__).with_name("tiers.json").read_text(encoding="utf-8"))
+
+
 def local_models() -> dict[str, ChatOpenAI]:
-    def model(think: bool, max_tokens: int) -> ChatOpenAI:
+    """One chat model per tier in tiers.json. fast has a short budget on purpose: a long
+    answer is cut off and climbs to think."""
+    def model(tier: dict) -> ChatOpenAI:
         return ChatOpenAI(
-            model=os.environ["LOCAL_LLM_MODEL"],
+            model=os.environ["LOCAL_LLM_MODEL"],  # tiers.json names the model for the record; .env says where it runs
             base_url=os.environ["LOCAL_LLM_URL"],
             api_key=os.environ.get("LOCAL_LLM_API_KEY") or "local",
-            max_tokens=max_tokens,
+            max_tokens=tier["max_tokens"],
             temperature=0,
-            extra_body={"chat_template_kwargs": {"enable_thinking": think}},
+            extra_body={"chat_template_kwargs": {"enable_thinking": tier["thinking"]}},
         )
 
-    # fast gets a short budget on purpose: a long answer is cut off and climbs to think.
-    return {"fast": model(False, 512), "think": model(True, 6000)}
+    return {name: model(TIERS[name]) for name in ("fast", "think")}
 
 
 def direct(model: ChatOpenAI, text: str) -> tuple[str, int, float]:
@@ -55,6 +62,16 @@ def main() -> None:
         for text in messages:
             r = run_turn(agent, router, text)
             print(f"[{'→'.join(r['tried'])}] {r['reason']} ({r['output_tokens']} tokens, {r['seconds']:.1f}s)\n{r['answer']}\n")
+        return
+
+    if "--shadow" in sys.argv:
+        agent, router = build_agent(classifier, models, mode="shadow")
+        for t in TURNS:
+            run_turn(agent, router, t["text"])
+        report = shadow_report(router.log, TIERS)
+        print(f"shadow: {report['turns']} turns served by think, router intended {report['intended']}")
+        print(f"  estimated cost: always think {report['fixed_cost']:.2f}, routed {report['routed_cost']:.2f} "
+              f"({report['saving']:.0%} less); think actually used {report['measured_fixed_tokens']} output tokens")
         return
 
     started = time.perf_counter()

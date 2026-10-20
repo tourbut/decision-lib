@@ -9,7 +9,7 @@
 판정은 로컬 `d3-flash`가 턴마다 한 번 하고, 분기는 일반 코드가 정한다. LangChain 에이전트에는 미들웨어(`before_agent` + `wrap_model_call`)로 붙인다.
 
 - 참고: langchain-typesafe `ModelRouterMiddleware`, [Hermes jev-effort-router](https://hermes-agent.nousresearch.com/docs/plugins/jev-effort-router), [effortless-hermes](https://hermes-agent.nousresearch.com/docs/plugins/effortless-hermes), [Intern-Decision](https://arxiv.org/abs/2610.22131)
-- 이슈: #7(모델 라우팅 미들웨어), #21(신뢰도 기반 상위 모델 이관), #29(턴별 모델·추론 강도), #30(턴별 effort 판정과 실패 시 상향)
+- 이슈: #7(모델 라우팅 미들웨어), #21(신뢰도 기반 상위 모델 이관), #29(턴별 모델·추론 강도), #30(턴별 effort 판정과 실패 시 상향), #8(shadow 모드와 티어 설정)
 
 ## 처리 흐름
 
@@ -48,6 +48,8 @@ flowchart TD
 - **답이 비었거나 잘리면 한 단계 올린다.** fast 답이 512토큰 한도에서 끊기면 같은 턴 안에서 think로 다시 답한다. effortless-hermes는 다음 턴의 effort를 올리지만, 이 샘플은 그 자리에서 다시 시도한다.
 - 메시지에 `effort: think`처럼 적으면 판정을 건너뛴다.
 - langchain-typesafe의 `ModelRouterMiddleware`도 같은 자리에서 모델을 고른다. 다만 판정기를 환경 변수로 직접 만들어 로컬 d3-flash를 주입할 수 없고, 임계값·폴백·이관이 없다. 그래서 같은 구조(`before_agent`에서 판정 → `wrap_model_call`에서 모델 교체)로 다시 만들었다.
+- 경로별 설정은 `tiers.json`에 둔다(모델, 추론 켬/끔, 토큰 한도, 가격, 평균 출력 토큰). `demo.py`는 이 파일로 모델을 만든다.
+- **shadow 모드로 먼저 지켜본다.** `mode="shadow"`는 판정은 하되 항상 고정 경로(think)로 답하고, 라우터가 고르려던 경로(`intended`)만 기록한다. `mode="off"`는 라우터를 부르지 않는다. Hermes Jev Skills의 on/shadow/off 스위치와 같다. `shadow_report()`가 기록과 `tiers.json`으로 비용 절감을 추정한다.
 - 상위 모델이 로컬에 없어서 handoff는 넘김 안내만 돌려준다. 내부 대형 모델이 생기면 `models`에 경로를 하나 더 두고 `LADDER`를 늘리면 된다.
 
 ## 실행
@@ -59,6 +61,7 @@ uv sync
 uv run pytest -q                      # 오프라인, 18개
 uv run python demo.py                 # 32턴 라우팅 + 정답 있는 23턴 비교, 약 5분
 uv run python demo.py --route-only    # 라우팅만, 약 12초
+uv run python demo.py --shadow        # 32턴을 think로 답하며 라우터 판정만 기록, 비용 추정
 uv run python demo.py "2의 50제곱의 마지막 자리 숫자는?"
 ```
 
@@ -84,4 +87,5 @@ uv run python demo.py "2의 50제곱의 마지막 자리 숫자는?"
 - 항상 fast가 틀린 2건은 회문 세기와 저울 퍼즐이다. 할인 함정은 이번 실행에서는 맞았다. 온도 0이어도 추론 없는 답은 실행마다 흔들렸다.
 - handoff 6턴은 LLM을 부르지 않는다. 송금 요청을 웹 화면에서 비교해 보니 항상 fast·항상 think도 "직접 처리할 수 없다"고 스스로 거절했다. 이관의 이득은 답의 품질보다, 사람이나 권한 있는 시스템으로 넘길 사유를 코드가 남긴다는 데 있다. 이 6턴은 위 표에 넣지 않았다.
 - 라벨과 임계값(0.5 폴백)을 같은 32턴으로 정했다. 32/32는 이 세트의 결과이고 처음 보는 대화의 정확도가 아니다.
+- shadow 모드(32턴 모두 think로 응답): 라우터는 fast 10, think 16, handoff 6을 골랐다. `tiers.json`의 평균 출력 토큰(fast 73, think 206, handoff 0)으로 추정하면 라우팅 쪽이 39% 적다. 이때 think가 실제로 쓴 출력 토큰은 7,626개였다(턴당 약 238). 두 경로가 같은 모델이라 가격은 같게 두었다. 실제로 다른 모델을 쓰면 `price_per_1k`만 바꾸면 된다.
 - 정답 판정은 마지막 `정답:` 줄(없으면 마지막 줄)에서 값이 따로 떨어져 나오는지 본다. `400원`에서 `0`을, `15/12`에서 `5/12`를 정답으로 세지 않는다.

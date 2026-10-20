@@ -9,7 +9,7 @@ from langchain_core.runnables import RunnableLambda
 from langchain_typesafe import ClassifierResponse
 from langchain_typesafe.client import TypeSafeAPIConnectionError
 
-from router import build_agent, correct, decide, route_turn, run_turn
+from router import build_agent, correct, decide, route_turn, run_turn, shadow_report
 from turns import TURNS
 
 
@@ -103,3 +103,28 @@ def test_correct(answer: str, key: str, ok: bool) -> None:
 
 def test_turn_labels() -> None:
     assert {t["label"] for t in TURNS} == {"fast", "think", "handoff"} and len(TURNS) == 32
+
+
+def test_shadow_serves_the_fixed_route_and_logs_the_intended_one() -> None:
+    models = {"fast": fake(), "think": fake(reply("정답: 서울"))}
+    agent, router = build_agent(RunnableLambda(lambda _: answers("fast")), models, mode="shadow")
+    r = run_turn(agent, router, "대한민국의 수도는?")
+    assert (r["intended"], r["route"], r["tried"], r["mode"]) == ("fast", "think", ["think"], "shadow")
+
+
+def test_off_skips_the_router() -> None:
+    def never(_):
+        raise AssertionError("off must not call the decision model")
+
+    agent, router = build_agent(RunnableLambda(never), {"fast": fake(), "think": fake(reply("안녕"))}, mode="off")
+    assert run_turn(agent, router, "안녕")["tried"] == ["think"]
+
+
+def test_shadow_report_estimates_saving_from_tiers() -> None:
+    tiers = {"fast": {"avg_output_tokens": 100, "price_per_1k": 1.0}, "think": {"avg_output_tokens": 400, "price_per_1k": 1.0},
+             "handoff": {"avg_output_tokens": 0, "price_per_1k": 0.0}}
+    records = [{"intended": i, "output_tokens": 400} for i in ("fast", "think", "handoff", "fast")]
+    report = shadow_report(records, tiers)
+    assert report["intended"] == {"fast": 2, "think": 1, "handoff": 1}
+    assert report["fixed_cost"] == pytest.approx(1.6) and report["routed_cost"] == pytest.approx(0.6)
+    assert report["saving"] == pytest.approx(1 - 0.6 / 1.6) and report["measured_fixed_tokens"] == 1600

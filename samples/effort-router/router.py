@@ -111,20 +111,33 @@ class _State(AgentState):
 class EffortRouterMiddleware(AgentMiddleware[_State]):
     """Routes once per run (before_agent), then serves every model call of the run from
     the routed model, climbing LADDER when an answer comes back incomplete. `log` keeps
-    one record per run for reports: the decision, the routes tried, tokens, seconds."""
+    one record per run for reports: the decision, the routes tried, tokens, seconds.
+
+    mode="on" serves the routed model. mode="shadow" asks the router and records what it
+    would have chosen (`intended`) but always serves `fixed`, so a team can watch the
+    router before trusting it (Hermes Jev Skills). mode="off" skips the router."""
 
     state_schema = _State
 
-    def __init__(self, classifier: Runnable[ClassifierRequest, ClassifierResponse], models: dict[str, BaseChatModel]):
+    def __init__(self, classifier: Runnable[ClassifierRequest, ClassifierResponse], models: dict[str, BaseChatModel],
+                 mode: Literal["on", "shadow", "off"] = "on", fixed: Route = DEFAULT):
         super().__init__()
         self.classifier = classifier
         self.models = models
+        self.mode = mode
+        self.fixed = fixed
         self.log: list[dict[str, Any]] = []
 
     def before_agent(self, state: _State, runtime) -> dict[str, Decision]:
         text = next(m for m in reversed(state["messages"]) if isinstance(m, HumanMessage)).content
-        decision = route_turn(self.classifier, str(text))
-        self.log.append({**decision, "tried": [], "output_tokens": 0, "seconds": 0.0})
+        if self.mode == "off":
+            decision: Decision = {"route": self.fixed, "reason": "라우터 꺼짐", "source": "override", "scores": {}}
+        else:
+            decision = route_turn(self.classifier, str(text))
+        intended = decision["route"]
+        if self.mode == "shadow":
+            decision = {**decision, "route": self.fixed, "reason": f"shadow: {intended} 판정만 기록, {self.fixed}로 응답"}
+        self.log.append({**decision, "intended": intended, "mode": self.mode, "tried": [], "output_tokens": 0, "seconds": 0.0})
         return {"route": decision}
 
     def wrap_model_call(self, request: ModelRequest, handler: Callable[[ModelRequest], ModelResponse]):
@@ -147,9 +160,29 @@ class EffortRouterMiddleware(AgentMiddleware[_State]):
             record["seconds"] += time.perf_counter() - started
 
 
-def build_agent(classifier, models: dict[str, BaseChatModel]):
-    router = EffortRouterMiddleware(classifier, models)
+def build_agent(classifier, models: dict[str, BaseChatModel], mode: Literal["on", "shadow", "off"] = "on"):
+    router = EffortRouterMiddleware(classifier, models, mode=mode)
     return create_agent(models["fast"], tools=[], system_prompt=SYSTEM, middleware=[router]), router
+
+
+def shadow_report(records: list[dict[str, Any]], tiers: dict[str, dict[str, Any]], fixed: Route = DEFAULT) -> dict[str, Any]:
+    """From a shadow log, what routing would have cost against always serving `fixed`.
+    Costs use each tier's average output tokens and price from tiers.json, so this is an
+    estimate; the measured tokens of the fixed model are reported next to it."""
+    def cost(route: str) -> float:
+        tier = tiers[route]
+        return tier["avg_output_tokens"] * tier["price_per_1k"] / 1000
+
+    intended = [r["intended"] for r in records]
+    fixed_cost, routed_cost = cost(fixed) * len(records), sum(cost(r) for r in intended)
+    return {
+        "turns": len(records),
+        "intended": {route: intended.count(route) for route in LADDER},
+        "fixed_cost": fixed_cost,
+        "routed_cost": routed_cost,
+        "saving": 1 - routed_cost / fixed_cost if fixed_cost else 0.0,
+        "measured_fixed_tokens": sum(r["output_tokens"] for r in records),
+    }
 
 
 def run_turn(agent, router: EffortRouterMiddleware, text: str) -> dict[str, Any]:

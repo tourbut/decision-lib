@@ -31,16 +31,19 @@ export async function effortView(root) {
 
   const text = h("input", { type: "text", value: examples[3] });
   const compare = h("input", { type: "checkbox" });
+  const mode = h("select", { "aria-label": "라우터 모드" },
+    [["on", "on: 판정대로 응답"], ["shadow", "shadow: 판정만 기록, think로 응답"], ["off", "off: 라우터 없이 think"]]
+      .map(([v, l]) => h("option", { value: v }, l)));
   const runBtn = h("button", { class: "primary" }, "턴 실행");
   const runStatus = h("p", { class: "status", role: "status" });
   const out = h("div");
 
   runBtn.addEventListener("click", () => runBusy(runBtn, runStatus,
     compare.checked ? "라우팅, 항상 fast, 항상 think로 각각 답하는 중" : "판정하고 답하는 중", async () => {
-      const data = await api("/api/effort-router/turn", { text: text.value, compare: compare.checked });
+      const data = await api("/api/effort-router/turn", { text: text.value, compare: compare.checked, mode: mode.value });
       const r = data.routed;
       const rows = [h("tr", {},
-        h("td", { class: "id" }, "라우팅", h("div", { class: "text" },
+        h("td", { class: "id" }, r.mode === "on" ? "라우팅" : `라우팅(${r.mode}, 의도: ${r.intended})`, h("div", { class: "text" },
           `경로 ${r.tried.join(" → ")} · ${r.output_tokens}토큰 · ${r.seconds.toFixed(1)}초${mark(r)}`)),
         h("td", {}, h("div", { class: "answer" }, r.answer)))];
       for (const [name, b] of Object.entries(data.baselines ?? {})) {
@@ -76,17 +79,27 @@ export async function effortView(root) {
           h("td", {}, routeMeters(r.scores, t)))))));
   }));
 
+  const shadowBtn = h("button", { class: "quiet" }, "shadow 비용 추정");
+  const shadowOut = h("div");
+  shadowBtn.addEventListener("click", () => runBusy(shadowBtn, allStatus, "라우터 판정만 모으는 중", async () => {
+    const s = await api("/api/effort-router/shadow", {});
+    shadowOut.replaceChildren(h("p", {},
+      `${s.turns}턴에서 라우터 의도: fast ${s.intended.fast}, think ${s.intended.think}, handoff ${s.intended.handoff}. ` +
+      `tiers.json 기준 비용: 항상 think ${s.fixed_cost.toFixed(2)} → 라우팅 ${s.routed_cost.toFixed(2)} (${Math.round(s.saving * 100)}% 절감 추정).`));
+  }));
+
   root.append(
     h("section", { class: "run" },
       h("h3", {}, "턴 하나 실행"),
       h("label", { class: "field" }, "메시지 (effort: think 처럼 적으면 판정을 건너뜀)", text),
       h("div", { class: "row examples" }, "예시:",
         examples.map((q) => h("button", { onclick: () => { text.value = q; runBtn.click(); } }, q))),
-      h("div", { class: "row" }, h("label", {}, compare, " 항상 fast·항상 think와 비교"), runBtn, runStatus),
+      h("div", { class: "row" }, h("label", {}, "모드 ", mode), h("label", {}, compare, " 항상 fast·항상 think와 비교"), runBtn, runStatus),
       out),
     h("section", { class: "run" },
       h("h3", {}, "라벨 측정"),
       h("p", { class: "text" }, `턴 ${setup.turns.length}개에 직접 라벨을 붙였다. 확신도가 ${t.confident} 미만이면 think로, 외부 접근이나 피해 위험이 ${t.access_handoff} 이상이면 handoff로 보낸다. 눈금이 그 기준이다.`),
-      h("div", { class: "row" }, allBtn, allStatus),
+      h("div", { class: "row" }, allBtn, shadowBtn, allStatus),
+      shadowOut,
       allOut));
 }

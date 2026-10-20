@@ -27,11 +27,20 @@ def models() -> dict:
 class TurnRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
     compare: bool = False  # also answer with always-fast and always-think
+    mode: str = Field(default="on", pattern="^(on|shadow|off)$")
 
 
 @router.get("/setup")
 def setup() -> dict:
-    return {"turns": TURNS, "thresholds": router_mod.THRESHOLDS}
+    return {"turns": TURNS, "thresholds": router_mod.THRESHOLDS, "tiers": demo.TIERS}
+
+
+@router.post("/shadow")
+def shadow(decision_model: Annotated[object, Depends(classifier)]) -> dict:
+    """Estimate from routing decisions alone (no LLM): what the router would have chosen
+    for the labelled turns, priced with tiers.json against always-think."""
+    records = [{"intended": router_mod.route_turn(decision_model, t["text"])["route"], "output_tokens": 0} for t in TURNS]
+    return router_mod.shadow_report(records, demo.TIERS)
 
 
 @router.post("/route")
@@ -45,7 +54,7 @@ def turn(
     decision_model: Annotated[object, Depends(classifier)],
     llms: Annotated[dict, Depends(models)],
 ) -> dict:
-    agent, middleware = router_mod.build_agent(decision_model, llms)
+    agent, middleware = router_mod.build_agent(decision_model, llms, mode=body.mode)
     routed = router_mod.run_turn(agent, middleware, body.text)
     key = KEYS.get(body.text)
     out = {"routed": routed, "key": key, "baselines": None}

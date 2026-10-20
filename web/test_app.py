@@ -231,6 +231,11 @@ def test_effort_router_routes_turns_and_compares(client) -> None:
     handoff = client.post("/api/effort-router/turn", json={"text": "송금해 줘"}).json()
     assert handoff["routed"]["tried"] == ["handoff"] and handoff["baselines"] is None
 
+    shadow = client.post("/api/effort-router/turn", json={"text": "송금해 줘", "mode": "shadow"}).json()["routed"]
+    assert (shadow["intended"], shadow["tried"]) == ("handoff", ["think"])
+    report = client.post("/api/effort-router/shadow").json()
+    assert report["turns"] == 32 and report["intended"]["handoff"] == 1 and 0 < report["routed_cost"] <= report["fixed_cost"]
+
 
 def completion_answers(request) -> ClassifierResponse:
     done = "#52" in request["state"]["final_response"]

@@ -1,0 +1,6 @@
+{
+  "_comment": "Route -> serving config. avg_output_tokens comes from the 23-turn comparison in README (2026-10-20); price is in relative units per 1k output tokens. With two different models, set model and price per tier.",
+  "fast": {"model": "muse-glimmer-30b", "thinking": false, "max_tokens": 512, "price_per_1k": 1.0, "avg_output_tokens": 73},
+  "think": {"model": "muse-glimmer-30b", "thinking": true, "max_tokens": 6000, "price_per_1k": 1.0, "avg_output_tokens": 206},
+  "handoff": {"model": null, "price_per_1k": 0.0, "avg_output_tokens": 0}
+}
