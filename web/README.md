@@ -25,7 +25,7 @@ flowchart LR
 cd web
 uv sync
 uv run uvicorn app:app --port 8300   # http://127.0.0.1:8300
-uv run pytest                        # 스텁 모델, 네트워크 없이 실행
+uv run pytest                        # 스텁 모델, 네트워크 없이 실행. 정적 JS 구문 검사에 node가 필요하다
 ```
 
 ## 샘플 추가

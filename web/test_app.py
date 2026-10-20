@@ -390,8 +390,7 @@ def test_static_modules_parse(tmp_path) -> None:
     from pathlib import Path
 
     node = shutil.which("node")
-    if not node:
-        pytest.skip("node not installed")
+    assert node, "이 검사는 node가 필요하다(README의 실행 절 참고)"
     for js in Path("static").rglob("*.js"):
         if "vendor" in js.parts:
             continue
