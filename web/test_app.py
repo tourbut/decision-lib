@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options", "action-picker", "judgment-tools", "code-judge", "news-match",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -422,3 +422,18 @@ def test_code_judge_search_and_review(client) -> None:
     flagged = client.post("/api/code-judge/review", json={"diff": 'API = "sk_live_x"'}).json()
     assert flagged["flags"] == ["secret"]
     assert len(client.post("/api/code-judge/review/eval").json()["rows"]) == 12
+
+
+def news_scores(request) -> ClassifierResponse:
+    hit = "HBM" in request["state"]["headline"]
+    return response({name: {"type": "score", "score": 3.0 if (hit and name == "chips") else 0.1,
+                            "legend": {str(i): str(i) for i in range(4)}, "probabilities": {str(i): 0.25 for i in range(4)},
+                            "confidence": 0.5} for name in request["questions"]})
+
+
+def test_news_match_sample_feed_and_pasted(client) -> None:
+    use(news_scores)
+    data = client.post("/api/news-match/match", json={}).json()
+    assert len(data["headlines"]) == 40 and data["labels"] is not None
+    pasted = client.post("/api/news-match/match", json={"headlines": ["HBM 증산", "야구"]}).json()
+    assert pasted["labels"] is None and pasted["scores"][0]["chips"] == 3.0

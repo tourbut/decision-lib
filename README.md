@@ -22,6 +22,7 @@ decision 모델은 텍스트를 생성하지 않는다. 상태(state)와 질문�
 | [action-picker](samples/action-picker/README.md) | 지금 가능한 행동만 후보로 주고 다음 행동 하나(또는 완료·보류)를 고른다. 사내 웹 이동, 설정 앱 조작(dry run), 격자 세계의 플래너 + 컨트롤러(stage guard). 격자는 후보의 크기에 따른 차이를 잰다 | [jev-ultrafast](https://github.com/browser-use/jev-ultrafast), [Agent Desktop](https://github.com/lahfir/agent-desktop), [minecraft-agent](https://github.com/rmalde/minecraft-agent), #1 #19 #18 |
 | [judgment-tools](samples/judgment-tools/README.md) | 판정을 MCP 도구 8개(check, route, score, verify, gate, approval, fastpath, skill_relation)로 노출해 코딩 에이전트가 직접 부르게 한다. 백엔드는 로컬 d3-flash, 결과는 모두 권고다 | [jev-mcp](https://github.com/jkudish/jev-mcp), Hermes jev-typesafe·structured-aux·fastpath·curator, #9 #35 #36 #28 #31 #34 |
 | [code-judge](samples/code-judge/README.md) | 한국어 질문으로 이 레포 샘플 코드를 동작 기준으로 찾고(폴더 → 선언 2단계, 키워드 검색과 비교), diff는 체크리스트 5개(주입·비밀·오류 삼킴·자원 누수·민감 로그)로 판정한다 | [jevgrep](https://github.com/dzhng/jevgrep), [jev-review](https://github.com/devagrawal09/jev-review), #12 #13 |
+| [news-match](samples/news-match/README.md) | 헤드라인마다 관심 주제별 Score(0–3)를 매겨 주제별 읽을 목록을 만든다. 낱말만 겹친 기사는 거르고, 기준값별 정밀도·재현율을 비교한다 | [newsjack](https://newsjack.sh), #16 |
 
 ## 웹에서 실행
 

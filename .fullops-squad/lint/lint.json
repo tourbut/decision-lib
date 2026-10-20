@@ -170,6 +170,18 @@
       "cwd": "samples/code-judge"
     },
     {
+      "name": "news-match-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/news-match"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
