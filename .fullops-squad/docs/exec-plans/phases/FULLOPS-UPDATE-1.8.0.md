@@ -3,7 +3,7 @@ title: FullOps 1.8.0 업데이트 적용 기록
 status: draft
 updated: 2026-10-21
 owner: dev
-summary: "decision-lib 레포에 FullOps 1.7.1·1.8.0 릴리스를 적용한 판정·변경·검증 기록"
+summary: decision-lib 레포에 FullOps 1.7.1·1.8.0 릴리스를 적용한 판정·변경·검증 기록
 ---
 
 # FullOps 1.8.0 업데이트 적용 기록
@@ -39,7 +39,7 @@ summary: "decision-lib 레포에 FullOps 1.7.1·1.8.0 릴리스를 적용한 판
 
 ## 검증
 
-- `lint.py --repo . --from <업데이트 직전 SHA>`: 결과는 커밋 메시지와 보고에 남긴다.
+- `lint.py --repo . --from fa4af9d`(1.8.0 lint): 첫 실행에서 이 기록의 front matter 형식(DOC-003) 1건이 나와 `deliverables.py --stamp`로 고쳤다. 고친 뒤 오류 0.
 - 레포 코드·테스트 변경 없음.
 
 ## 보류
