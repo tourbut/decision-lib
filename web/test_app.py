@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank",
+        "completion-check", "rerank", "context-gate",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -268,3 +268,27 @@ def test_rerank_query_and_typed_claim(client) -> None:
     typed = client.post("/api/rerank/query", json={"text": "vitamin D reduces fracture risk", "depth": 5}).json()
     assert typed["metrics"] is None and len(typed["rows"]) <= 5
     assert client.post("/api/rerank/query", json={"query_id": "nope"}).status_code == 404
+
+
+def context_answers(request) -> ClassifierResponse:
+    state = request["state"]
+    if "memory_entry" in state:
+        return response({"worth": {"type": "noul", "noul": 0.9 if "한국어" in state["memory_entry"] else 0.05}})
+    need = 0.9 if state["tool_call"].startswith("read_file") else 0.1
+    return response({"keep_result": {"type": "noul", "noul": need}, "keep_call": {"type": "noul", "noul": 0.1}})
+
+
+def test_context_gate_compaction_and_memory(client) -> None:
+    use(context_answers)
+    data = client.post("/api/context-gate/compact").json()
+    assert len(data["rows"]) == 12 and data["totals"]["need_based"]["chars"] < data["totals"]["original"]["chars"]
+    assert data["totals"]["need_based"]["facts"] == 3
+
+    assert client.post("/api/context-gate/memory/check", json={"text": "DB 비밀번호는 hunter2다"}).json()["source"] == "rule"
+    rows = client.post("/api/context-gate/memory/eval").json()["rows"]
+    assert len(rows) == 30 and any(not r["allow"] for r in rows)
+
+    calls = [{"name": "remember", "args": {"text": "답은 한국어로"}, "id": "m1"}]
+    app.dependency_overrides[llm] = lambda: ToolCallingFake(messages=iter([AIMessage("", tool_calls=calls), AIMessage("저장함")]))
+    agent = client.post("/api/context-gate/memory/agent", json={"message": "기억해"}).json()
+    assert agent["stored"] == ["답은 한국어로"] and agent["log"][0]["allow"] is True

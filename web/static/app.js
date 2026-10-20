@@ -5,6 +5,7 @@ import { api, h, renderDiagrams, status } from "./common.js";
 import { calibrationView } from "./views/calibration.js";
 import { citationView } from "./views/citation.js";
 import { completionView } from "./views/completion.js";
+import { contextView } from "./views/context.js";
 import { discoveryView } from "./views/discovery.js";
 import { effortView } from "./views/effort.js";
 import { ragView } from "./views/rag.js";
@@ -24,6 +25,7 @@ const VIEWS = {
   "effort-router": effortView,
   "completion-check": completionView,
   "rerank": rerankView,
+  "context-gate": contextView,
 };
 
 async function show(sample) {

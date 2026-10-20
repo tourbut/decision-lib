@@ -98,6 +98,18 @@
       "cwd": "samples/rerank"
     },
     {
+      "name": "context-gate-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/context-gate"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
