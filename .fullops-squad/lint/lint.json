@@ -122,6 +122,18 @@
       "cwd": "samples/screenshot-check"
     },
     {
+      "name": "many-options-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/many-options"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [

@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate", "screenshot-check",
+        "completion-check", "rerank", "context-gate", "screenshot-check", "many-options",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -320,3 +320,25 @@ def test_screenshot_check_image_text_and_upload(client) -> None:
     assert bad.status_code == 422
     assert client.get("/api/screenshot-check/shot/nope").status_code == 404
     assert len(client.post("/api/screenshot-check/eval").json()["rows"]) == 16
+
+
+def first_listed(request) -> ClassifierResponse:
+    """Picks the first option of every Choice and calls every Noul a fit."""
+    answers = {}
+    for name, q in request["questions"].items():
+        if q.type == "choice":
+            labels = list(q.criteria)
+            probs = {k: (0.9 if i == 0 else 0.1 / (len(labels) - 1)) for i, k in enumerate(labels)}
+            answers[name] = {"type": "choice", "choice": labels[0], "probabilities": probs, "confidence": 0.9}
+        else:
+            answers[name] = {"type": "noul", "noul": 0.9}
+    return response(answers)
+
+
+def test_many_options_skill_and_zone(client) -> None:
+    use(first_listed)
+    skill = client.post("/api/many-options/skill", json={"text": "PDF 합쳐 줘"}).json()
+    assert skill["skill"] == "pdf-tools" and len(skill["shortlist"]) == 3
+    zone = client.post("/api/many-options/zone", json={"text": "카이로"}).json()
+    assert zone["groups"] == ["Africa"] and zone["choice"].startswith("Africa/")
+    assert len(client.post("/api/many-options/zone/eval").json()["rows"]) == 40
