@@ -10,6 +10,7 @@ import { discoveryView } from "./views/discovery.js";
 import { effortView } from "./views/effort.js";
 import { ragView } from "./views/rag.js";
 import { rerankView } from "./views/rerank.js";
+import { screenshotView } from "./views/screenshot.js";
 import { toolGateView } from "./views/toolgate.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -26,6 +27,7 @@ const VIEWS = {
   "completion-check": completionView,
   "rerank": rerankView,
   "context-gate": contextView,
+  "screenshot-check": screenshotView,
 };
 
 async function show(sample) {

@@ -109,6 +109,7 @@ textarea { resize: vertical; min-height: 64px; }
 input.narrow { width: 5em; }
 .row select { width: auto; }
 section.run h3 { margin: 8px 0 0; font-size: 18px; }
+img.shot { max-width: 100%; width: 360px; border: 1px solid var(--line); border-radius: var(--radius); }
 
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .examples button {

@@ -60,7 +60,7 @@ def test_samples_list_includes_readme_diagrams(client) -> None:
     samples = {s["id"]: s for s in client.get("/api/samples").json()}
     assert set(samples) == {
         "discovery-review", "rag-passage-filter", "tool-call-gate", "citation-check", "decision-calibration", "effort-router",
-        "completion-check", "rerank", "context-gate",
+        "completion-check", "rerank", "context-gate", "screenshot-check",
     }
     assert all(s["diagrams"] for s in samples.values())
 
@@ -292,3 +292,31 @@ def test_context_gate_compaction_and_memory(client) -> None:
     app.dependency_overrides[llm] = lambda: ToolCallingFake(messages=iter([AIMessage("", tool_calls=calls), AIMessage("저장함")]))
     agent = client.post("/api/context-gate/memory/agent", json={"message": "기억해"}).json()
     assert agent["stored"] == ["답은 한국어로"] and agent["log"][0]["allow"] is True
+
+
+def brand_answers(request) -> ClassifierResponse:
+    seen = "images" in request  # only the image path sends the screenshot
+    probs = {"MegaBank": 0.95 if seen else 0.0, "KoPay": 0.0, "Cloudnest": 0.0, "ShopMall": 0.0, "none": 0.05 if seen else 1.0}
+    return response({
+        "brand": {"type": "choice", "choice": max(probs, key=probs.get), "probabilities": probs, "confidence": 0.9},
+        "password_form": {"type": "noul", "noul": 0.95},
+    })
+
+
+def test_screenshot_check_image_text_and_upload(client) -> None:
+    from adapters import screenshot
+
+    app.dependency_overrides[screenshot.image_classifier] = lambda: RunnableLambda(brand_answers)
+    url = "https://secure-banking-portal.top/"
+    image = client.post("/api/screenshot-check/check", json={"url": url, "page_id": "phish-megabank-logo"}).json()
+    text = client.post("/api/screenshot-check/check", json={"url": url, "page_id": "phish-megabank-logo", "mode": "text"}).json()
+    assert (image["label"], text["label"]) == ("phishing", "other")
+
+    import base64
+    png = base64.b64encode((screenshot.check.SHOTS / "legit-megabank.png").read_bytes()).decode()
+    legit = client.post("/api/screenshot-check/check", json={"url": "https://login.megabank.co.kr/", "image_base64": png}).json()
+    assert legit["label"] == "legit"
+    bad = client.post("/api/screenshot-check/check", json={"url": url, "image_base64": base64.b64encode(b"GIF89a").decode()})
+    assert bad.status_code == 422
+    assert client.get("/api/screenshot-check/shot/nope").status_code == 404
+    assert len(client.post("/api/screenshot-check/eval").json()["rows"]) == 16

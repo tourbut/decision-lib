@@ -110,6 +110,18 @@
       "cwd": "samples/context-gate"
     },
     {
+      "name": "screenshot-check-test",
+      "kind": "test",
+      "run": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "samples/screenshot-check"
+    },
+    {
       "name": "web-test",
       "kind": "test",
       "run": [
